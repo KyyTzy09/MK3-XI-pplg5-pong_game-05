@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pong Game - Malam Berbintang</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Tampilan Start -->
+  <div id="start-screen" class="screen active">
+    <h1>Pong Malam Berbintang</h1>
+    <button id="start-btn">Mulai Sekarang</button>
+  </div>
+
+  <!-- Canvas Game -->
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div id="score">Skor: 0</div>
+  </div>
+
+  <!-- Tampilan Game Over -->
+  <div id="game-over" class="screen">
+    <h2>Game Over</h2>
+    <p id="final-score">Skor Anda: 0</p>
+    <button id="restart-btn">Main Lagi</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
