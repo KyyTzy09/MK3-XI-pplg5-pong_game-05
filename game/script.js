@@ -1,23 +1,16 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// === Atur ukuran canvas 90% lebar layar, 80% tinggi layar ===
-function resizeCanvas() {
-  canvas.width = window.innerWidth * 0.9;
-  canvas.height = window.innerHeight * 0.8;
-}
-resizeCanvas();
-
-// Supaya kalau ukuran layar berubah tetap adaptif
-window.addEventListener("resize", resizeCanvas);
+canvas.width = 400;
+canvas.height = 600;
 
 // Paddle
 const paddle = {
-  width: 150,
+  width: 80,
   height: 12,
-  x: canvas.width / 2 - 50,
+  x: canvas.width / 2 - 40,
   y: canvas.height - 30,
-  speed: 6,
+  speed: 6
 };
 
 // Ball
@@ -26,16 +19,16 @@ const ball = {
   y: canvas.height / 2,
   radius: 8,
   dx: 3,
-  dy: -3,
+  dy: -3
 };
 
 let score = 0;
+let lives = 3; // Tambahan nyawa
 let isGameRunning = false;
 
 // DOM Elements
 const startScreen = document.getElementById("start-screen");
 const startBtn = document.getElementById("start-btn");
-const backBtn = document.getElementById("back-btn");
 const gameOverScreen = document.getElementById("game-over");
 const finalScore = document.getElementById("final-score");
 const restartBtn = document.getElementById("restart-btn");
@@ -44,7 +37,6 @@ const scoreDisplay = document.getElementById("score");
 // Event Listeners
 document.addEventListener("mousemove", movePaddle);
 startBtn.addEventListener("click", startGame);
-backBtn.addEventListener('click' , backGame)
 restartBtn.addEventListener("click", restartGame);
 
 function movePaddle(e) {
@@ -53,22 +45,13 @@ function movePaddle(e) {
 
   // Batas paddle
   if (paddle.x < 0) paddle.x = 0;
-  if (paddle.x + paddle.width > canvas.width)
-    paddle.x = canvas.width - paddle.width;
+  if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
 }
 
 function startGame() {
   startScreen.classList.remove("active");
   resetGame();
   isGameRunning = true;
-  requestAnimationFrame(update);
-}
-
-function backGame() {
-  gameOverScreen.classList.remove('active')
-  startScreen.classList.add("active");
-  resetGame();
-  isGameRunning = false;
   requestAnimationFrame(update);
 }
 
@@ -79,13 +62,19 @@ function restartGame() {
   requestAnimationFrame(update);
 }
 
+// Update HUD (Skor + Nyawa)
+function updateHUD() {
+  scoreDisplay.textContent = `Skor: ${score} | Nyawa: ${lives}`;
+}
+
 function resetGame() {
   ball.x = canvas.width / 2;
   ball.y = canvas.height / 2;
   ball.dx = 3 * (Math.random() > 0.5 ? 1 : -1);
   ball.dy = -3;
   score = 0;
-  scoreDisplay.textContent = `Skor: ${score}`;
+  lives = 3; // Reset nyawa ke 3 setiap mulai ulang
+  updateHUD();
 }
 
 function drawPaddle() {
@@ -106,11 +95,11 @@ function draw() {
   drawPaddle();
   drawBall();
 }
-let hitPaddle = false;
 
 function update() {
   if (!isGameRunning) return;
 
+  // Update posisi bola
   ball.x += ball.dx;
   ball.y += ball.dy;
 
@@ -130,21 +119,27 @@ function update() {
     ball.x > paddle.x &&
     ball.x < paddle.x + paddle.width
   ) {
-    if (!hitPaddle) {
-      ball.dy *= -1;
-      score++;
-      scoreDisplay.textContent = `Skor: ${score}`;
-      hitPaddle = true; // kunci biar gak spam
-    }
-  } else {
-    hitPaddle = false; // reset ketika bola sudah menjauh
+    ball.dy *= -1;
+    score++;
+    updateHUD();
   }
 
-  // Game over
+  // Bola jatuh
   if (ball.y - ball.radius > canvas.height) {
-    isGameRunning = false;
-    finalScore.textContent = `Skor Anda: ${score}`;
-    gameOverScreen.classList.add("active");
+    lives--;
+    if (lives > 0) {
+      // reset posisi bola
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+      ball.dx = 3 * (Math.random() > 0.5 ? 1 : -1);
+      ball.dy = -3;
+      updateHUD();
+    } else {
+      // Game over
+      isGameRunning = false;
+      finalScore.textContent = `Skor Anda: ${score}`;
+      gameOverScreen.classList.add("active");
+    }
   }
 
   draw();
