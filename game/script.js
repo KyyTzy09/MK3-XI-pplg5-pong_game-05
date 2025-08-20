@@ -1,16 +1,23 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 400;
-canvas.height = 600;
+// === Atur ukuran canvas 90% lebar layar, 80% tinggi layar ===
+function resizeCanvas() {
+  canvas.width = window.innerWidth * 0.9;
+  canvas.height = window.innerHeight * 0.8;
+}
+resizeCanvas();
+
+// Supaya kalau ukuran layar berubah tetap adaptif
+window.addEventListener("resize", resizeCanvas);
 
 // Paddle
 const paddle = {
-  width: 80,
+  width: 200,
   height: 12,
-  x: canvas.width / 2 - 40,
+  x: canvas.width / 2 - 50,
   y: canvas.height - 30,
-  speed: 6
+  speed: 6,
 };
 
 // Ball
@@ -19,7 +26,7 @@ const ball = {
   y: canvas.height / 2,
   radius: 8,
   dx: 3,
-  dy: -3
+  dy: -3,
 };
 
 let score = 0;
@@ -44,7 +51,8 @@ function movePaddle(e) {
 
   // Batas paddle
   if (paddle.x < 0) paddle.x = 0;
-  if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+  if (paddle.x + paddle.width > canvas.width)
+    paddle.x = canvas.width - paddle.width;
 }
 
 function startGame() {
@@ -88,11 +96,11 @@ function draw() {
   drawPaddle();
   drawBall();
 }
+let hitPaddle = false;
 
 function update() {
   if (!isGameRunning) return;
 
-  // Update posisi bola
   ball.x += ball.dx;
   ball.y += ball.dy;
 
@@ -112,9 +120,14 @@ function update() {
     ball.x > paddle.x &&
     ball.x < paddle.x + paddle.width
   ) {
-    ball.dy *= -1;
-    score++;
-    scoreDisplay.textContent = `Skor: ${score}`;
+    if (!hitPaddle) {
+      ball.dy *= -1;
+      score++;
+      scoreDisplay.textContent = `Skor: ${score}`;
+      hitPaddle = true; // kunci biar gak spam
+    }
+  } else {
+    hitPaddle = false; // reset ketika bola sudah menjauh
   }
 
   // Game over
