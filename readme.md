@@ -1,4 +1,4 @@
-# Pong Malam Berbintang
+# Starry Night Game Pong
 
 Game Pong sederhana dengan tema malam berbintang menggunakan HTML, CSS, dan JavaScript.
 
@@ -21,4 +21,4 @@ Game Pong sederhana dengan tema malam berbintang menggunakan HTML, CSS, dan Java
 ## Teknologi
 - HTML5 (Canvas)
 - CSS3 (Animasi dan tema gelap)
-- JavaScript murni
+- JavaScript murni  
