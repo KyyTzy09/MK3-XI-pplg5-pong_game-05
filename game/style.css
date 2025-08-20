@@ -61,6 +61,13 @@ body::before {
   font-size: 2rem;
 }
 
+.btncontainer {
+  width: 100%;
+  justify-items: center;
+  align-items: center;
+  display: flex;
+}
+
 button {
   padding: 12px 25px;
   font-size: 1rem;

@@ -13,7 +13,7 @@ window.addEventListener("resize", resizeCanvas);
 
 // Paddle
 const paddle = {
-  width: 200,
+  width: 150,
   height: 12,
   x: canvas.width / 2 - 50,
   y: canvas.height - 30,
@@ -35,6 +35,7 @@ let isGameRunning = false;
 // DOM Elements
 const startScreen = document.getElementById("start-screen");
 const startBtn = document.getElementById("start-btn");
+const backBtn = document.getElementById("back-btn");
 const gameOverScreen = document.getElementById("game-over");
 const finalScore = document.getElementById("final-score");
 const restartBtn = document.getElementById("restart-btn");
@@ -43,6 +44,7 @@ const scoreDisplay = document.getElementById("score");
 // Event Listeners
 document.addEventListener("mousemove", movePaddle);
 startBtn.addEventListener("click", startGame);
+backBtn.addEventListener('click' , backGame)
 restartBtn.addEventListener("click", restartGame);
 
 function movePaddle(e) {
@@ -59,6 +61,14 @@ function startGame() {
   startScreen.classList.remove("active");
   resetGame();
   isGameRunning = true;
+  requestAnimationFrame(update);
+}
+
+function backGame() {
+  gameOverScreen.classList.remove('active')
+  startScreen.classList.add("active");
+  resetGame();
+  isGameRunning = false;
   requestAnimationFrame(update);
 }
 
