@@ -86,12 +86,12 @@ button:hover {
 #gameCanvas {
   background: transparent;
   display: block;
-  margin: 0 auto;
-  margin-top: 2%;
-  border: 3px solid #1e90ff; /* warna biru neon */
-  border-radius: 12px;        /* biar sudutnya halus */
-  box-shadow: 0 0 15px #1e90ff80; /* efek glow lembut */
+  margin: 2% auto 0; 
+  border: 3px solid #1e90ff;
+  border-radius: 12px;
+  box-shadow: 0 0 15px #1e90ff80;
 }
+
 
 #score {
   position: absolute;
