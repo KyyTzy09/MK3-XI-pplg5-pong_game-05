@@ -5,7 +5,7 @@ const nameInput = document.getElementById("player-name");
 playBtn.addEventListener("click", () => {
   const playerName = nameInput.value.trim();
   if (!playerName) {
-    alert("Isi nama dulu sebelum main!");
+    alert("Please, input your name before playing!");
     return;
   }
   localStorage.setItem("currentPlayer", playerName);

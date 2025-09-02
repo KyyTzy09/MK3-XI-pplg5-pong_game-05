@@ -1,4 +1,4 @@
-# Starry Night Pong Game
+# Starry Night Pong Game✨
 
 Game Pong sederhana dengan tema malam berbintang menggunakan HTML, CSS, dan JavaScript.
 
@@ -14,9 +14,9 @@ Game Pong sederhana dengan tema malam berbintang menggunakan HTML, CSS, dan Java
 
 ## Fitur
 - Tema malam berbintang modern.
+- 3 nyawa setiap permainan
 - Skor real-time.
-- Tampilan **Start Screen** dan **Game Over** yang menarik.
-- Kontrol sederhana menggunakan mouse.
+- Kontrol sederhana menggunakan mouse & keyboard.
 
 ## Teknologi
 - HTML5 (Canvas)

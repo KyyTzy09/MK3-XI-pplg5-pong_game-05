@@ -90,7 +90,7 @@ function backGame() {
 }
 
 function updateHUD() {
-  scoreDisplay.textContent = `Skor: ${score} | Nyawa: ${lives}`;
+  scoreDisplay.textContent = `Score⭐: ${score} | Lives ❤ : ${lives}`;
 }
 
 function resetGame() {
@@ -176,7 +176,7 @@ function update() {
       updateHUD();
     } else {
       isGameRunning = false;
-      finalScore.textContent = `Skor Anda: ${score}`;
+      finalScore.textContent = `Your Score⭐: ${score}`;
       gameOverScreen.classList.add("active");
 
       // === Leaderboard ===

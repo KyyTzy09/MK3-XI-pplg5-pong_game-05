@@ -5,7 +5,7 @@ const backMenu = document.getElementById("back-menu");
 let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
 
 if (leaderboard.length === 0) {
-  leaderboardList.innerHTML = "<p>Belum ada skor tersimpan</p>";
+  leaderboardList.innerHTML = "<p>No Scores save yet😞</p>";
 } else {
   leaderboard.forEach((player) => {
     const li = document.createElement("li");
