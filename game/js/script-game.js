@@ -33,6 +33,28 @@ let score = 0;
 let lives = 3;
 let isGameRunning = false;
 
+// === SOUND EFFECT ===
+const bounceSound = new Audio("https://freesound.org/data/previews/82/82364_1022651-lq.mp3");
+const loseSound = new Audio("https://freesound.org/data/previews/331/331912_3248244-lq.mp3");
+const gameOverSound = new Audio("https://freesound.org/data/previews/398/398867_5121236-lq.mp3");
+const perfectSound = new Audio("https://freesound.org/data/previews/341/341695_5121236-lq.mp3");
+
+// === BACKGROUND MUSIC ===
+const bgMusic = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+bgMusic.loop = true;
+bgMusic.volume = 0.5;
+
+// === TEXT EFFECT ===
+let floatingText = null;
+function showFloatingText(message, color = "white") {
+  floatingText = {
+    text: message,
+    color: color,
+    opacity: 1,
+    y: canvas.height / 2,
+  };
+}
+
 // DOM Elements
 const backBtn = document.getElementById("back-btn");
 const gameOverScreen = document.getElementById("game-over");
@@ -53,8 +75,6 @@ window.addEventListener("resize", resizeCanvas);
 function movePaddleMouse(e) {
   const rect = canvas.getBoundingClientRect();
   paddle.x = (e.clientX - rect.left) / scaleX - paddle.width / 2;
-
-  // Batas paddle
   if (paddle.x < 0) paddle.x = 0;
   if (paddle.x + paddle.width > canvas.width)
     paddle.x = canvas.width - paddle.width;
@@ -73,6 +93,7 @@ function keyUpHandler(e) {
 window.addEventListener("load", () => {
   resetGame();
   isGameRunning = true;
+  bgMusic.play();
   requestAnimationFrame(update);
 });
 
@@ -80,6 +101,8 @@ function restartGame() {
   gameOverScreen.classList.remove("active");
   resetGame();
   isGameRunning = true;
+  bgMusic.currentTime = 0;
+  bgMusic.play();
   requestAnimationFrame(update);
 }
 
@@ -118,16 +141,31 @@ function drawBall() {
   ctx.closePath();
 }
 
+function drawFloatingText() {
+  if (floatingText) {
+    ctx.font = "bold 40px Arial";
+    ctx.fillStyle = `rgba(${floatingText.color === "white" ? "255,255,255" : "255,50,50"},${floatingText.opacity})`;
+    ctx.textAlign = "center";
+    ctx.fillText(floatingText.text, canvas.width / 2, floatingText.y);
+    floatingText.y -= 1;
+    floatingText.opacity -= 0.02;
+    if (floatingText.opacity <= 0) {
+      floatingText = null;
+    }
+  }
+}
+
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawPaddle();
   drawBall();
+  drawFloatingText();
 }
 
 function update() {
   if (!isGameRunning) return;
 
-  // Gerakan paddle (keyboard)
+  // Gerakan paddle
   if (paddle.movingLeft) {
     paddle.x -= paddle.speed;
     if (paddle.x < 0) paddle.x = 0;
@@ -145,14 +183,18 @@ function update() {
   // Pantulan kiri/kanan
   if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
     ball.dx *= -1;
+    bounceSound.currentTime = 0;
+    bounceSound.play();
   }
 
   // Pantulan atas
   if (ball.y - ball.radius < 0) {
     ball.dy *= -1;
+    bounceSound.currentTime = 0;
+    bounceSound.play();
   }
 
-  // Pantulan paddle (fix bug)
+  // Pantulan paddle
   if (
     ball.y + ball.radius >= paddle.y &&
     ball.y + ball.radius <= paddle.y + paddle.height &&
@@ -163,45 +205,51 @@ function update() {
     ball.dy *= -1;
     score++;
     updateHUD();
+    bounceSound.currentTime = 0;
+    bounceSound.play();
+    perfectSound.currentTime = 0;
+    perfectSound.play();
+    showFloatingText("PERFECT!", "white");
   }
 
   // Bola jatuh
   if (ball.y - ball.radius > canvas.height) {
     lives--;
+    updateHUD();
+    loseSound.currentTime = 0;
+    loseSound.play();
+    showFloatingText("OH NO!", "red");
+
     if (lives > 0) {
       ball.x = canvas.width / 2;
       ball.y = canvas.height / 2;
       ball.dx = 3 * (Math.random() > 0.5 ? 1 : -1);
       ball.dy = -3;
-      updateHUD();
     } else {
       isGameRunning = false;
       finalScore.textContent = `Your Score⭐: ${score}`;
       gameOverScreen.classList.add("active");
 
-      // === Leaderboard ===
+      bgMusic.pause();
+      bgMusic.currentTime = 0;
+
+      gameOverSound.currentTime = 0;
+      gameOverSound.play();
+
       const playerName = localStorage.getItem("currentPlayer") || "Anonim";
       let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
-
-      // cek apakah nama player sudah ada
       const existingPlayer = leaderboard.find((p) => p.name === playerName);
 
       if (existingPlayer) {
-        // update hanya jika skor baru lebih tinggi
         if (score > existingPlayer.score) {
           existingPlayer.score = score;
         }
       } else {
-        // kalau belum ada → tambahin data baru
         leaderboard.push({ name: playerName, score: score });
       }
 
-      // urutkan dari skor tertinggi
       leaderboard.sort((a, b) => b.score - a.score);
-
-      // simpan hanya 10 besar
       leaderboard = leaderboard.slice(0, 10);
-
       localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
     }
   }
