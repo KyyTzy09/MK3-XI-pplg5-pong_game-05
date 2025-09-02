@@ -1,4 +1,4 @@
-# Starry Night Game Pong
+# Starry Night Pong Game
 
 Game Pong sederhana dengan tema malam berbintang menggunakan HTML, CSS, dan JavaScript.
 

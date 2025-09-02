@@ -1,32 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> Starry Night Game Pong </title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <!-- Tampilan Start -->
-  <div id="start-screen" class="screen active">
-    <h1>Starry Night Game Pong</h1>
-    <button id="start-btn"> Mulai Sekarang!! </button>
-  </div>
-    <!-- Canvas Game -->
-    <div id="game-container">
-      <canvas id="gameCanvas"></canvas>
-      <div id="score">Skor: 0</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Menu - Starry Night Pong</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="screen active">
+      <h1>Starry Night Pong</h1>
+      <input type="text" class="input-game" id="player-name" placeholder="Enter your name" />
+      <button class="btn-menu" id="btn-play">Start Game</button>
+      <button class="btn-menu" id="leaderboard-btn">Leaderboard</button>
     </div>
-
-    <!-- Tampilan Game Over -->
-    <div id="game-over" class="screen">
-      <h2>Game Over</h2>
-      <p id="final-score">Skor Kamu: 0</p>
-      <div class="btn-container">
-        <button id="back-btn">Kembali</button>
-        <button id="restart-btn">Coba lagi</button>
-      </div>
-    </div>
-    <script src="script.js"></script>
   </body>
+  <script src="./js/script-menu.js"></script>
 </html>

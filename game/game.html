@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Starry Night Pong Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Canvas Game -->
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div id="score">Score: 0</div>
+  </div>
+  <!-- Tampilan Game Over -->
+  <div id="game-over" class="screen">
+    <h2>Game Over</h2>
+    <p id="final-score">Your Score : 0</p>
+    <div class="btn-container">
+      <button id="back-btn">Back</button>
+      <button id="restart-btn">Try again</button>
+    </div>
+  </div>
+
+  <script src="./js/script-game.js"></script>
+</body>
+</html>
