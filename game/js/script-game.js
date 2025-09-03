@@ -4,8 +4,6 @@ const ctx = canvas.getContext("2d");
 // Default ukuran
 let baseWidth = 1000;
 let baseHeight = 600;
-
-// Scale untuk responsive
 let scaleX = 1;
 let scaleY = 1;
 
@@ -32,17 +30,24 @@ const ball = {
 let score = 0;
 let lives = 3;
 let isGameRunning = false;
+let level = 1;
 
 // === SOUND EFFECT ===
 const bounceSound = new Audio("https://freesound.org/data/previews/82/82364_1022651-lq.mp3");
 const loseSound = new Audio("https://freesound.org/data/previews/331/331912_3248244-lq.mp3");
 const gameOverSound = new Audio("https://freesound.org/data/previews/398/398867_5121236-lq.mp3");
 const perfectSound = new Audio("https://freesound.org/data/previews/341/341695_5121236-lq.mp3");
+const levelUpSound = new Audio("https://freesound.org/data/previews/331/331912_3248244-lq.mp3");
 
 // === BACKGROUND MUSIC ===
 const bgMusic = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
 bgMusic.loop = true;
 bgMusic.volume = 0.5;
+
+// Start musik saat klik pertama (autoplay fix)
+document.addEventListener("click", () => {
+  if (bgMusic.paused) bgMusic.play();
+});
 
 // === TEXT EFFECT ===
 let floatingText = null;
@@ -53,6 +58,43 @@ function showFloatingText(message, color = "white") {
     opacity: 1,
     y: canvas.height / 2,
   };
+}
+
+// === TRAIL DAN LEDAKAN ===
+let ballTrail = [];
+let explosions = [];
+
+function updateTrail() {
+  ballTrail.unshift({ x: ball.x, y: ball.y });
+  if (ballTrail.length > 10) ballTrail.pop();
+}
+
+function drawTrail() {
+  ballTrail.forEach((pos, index) => {
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, ball.radius - index * 0.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,204,0,${1 - index * 0.1})`;
+    ctx.fill();
+    ctx.closePath();
+  });
+}
+
+function triggerExplosion(x, y) {
+  explosions.push({ x, y, radius: 5, alpha: 1 });
+}
+
+function drawExplosions() {
+  explosions.forEach((explosion, i) => {
+    ctx.beginPath();
+    ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${explosion.alpha})`;
+    ctx.fill();
+    ctx.closePath();
+
+    explosion.radius += 2;
+    explosion.alpha -= 0.05;
+    if (explosion.alpha <= 0) explosions.splice(i, 1);
+  });
 }
 
 // DOM Elements
@@ -93,7 +135,6 @@ function keyUpHandler(e) {
 window.addEventListener("load", () => {
   resetGame();
   isGameRunning = true;
-  bgMusic.play();
   requestAnimationFrame(update);
 });
 
@@ -113,7 +154,7 @@ function backGame() {
 }
 
 function updateHUD() {
-  scoreDisplay.textContent = `Score⭐: ${score} | Lives ❤ : ${lives}`;
+  scoreDisplay.textContent = `Score⭐: ${score} | Lives ❤: ${lives} | Level: ${level}`;
 }
 
 function resetGame() {
@@ -124,7 +165,11 @@ function resetGame() {
   paddle.x = canvas.width / 2 - paddle.width / 2;
   paddle.y = canvas.height - 30;
   score = 0;
+  level = 1;
   lives = 3;
+  paddle.width = 140;
+  ballTrail = [];
+  explosions = [];
   updateHUD();
 }
 
@@ -157,8 +202,10 @@ function drawFloatingText() {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawTrail();
   drawPaddle();
   drawBall();
+  drawExplosions();
   drawFloatingText();
 }
 
@@ -205,11 +252,26 @@ function update() {
     ball.dy *= -1;
     score++;
     updateHUD();
+
     bounceSound.currentTime = 0;
     bounceSound.play();
     perfectSound.currentTime = 0;
     perfectSound.play();
     showFloatingText("PERFECT!", "white");
+    triggerExplosion(ball.x, ball.y);
+
+    // LEVEL UP setiap 5 poin
+    if (score % 5 === 0) {
+      level++;
+      ball.dx *= 1.1;
+      ball.dy *= 1.1;
+      if (paddle.width > 60) {
+        paddle.width -= 10;
+      }
+      showFloatingText(`LEVEL UP!`, "yellow");
+      levelUpSound.currentTime = 0;
+      levelUpSound.play();
+    }
   }
 
   // Bola jatuh
@@ -254,6 +316,7 @@ function update() {
     }
   }
 
+  updateTrail();
   draw();
   requestAnimationFrame(update);
 }
@@ -262,10 +325,8 @@ function update() {
 function resizeCanvas() {
   canvas.width = window.innerWidth * 0.9;
   canvas.height = window.innerHeight * 0.8;
-
   scaleX = canvas.width / baseWidth;
   scaleY = canvas.height / baseHeight;
-
   paddle.y = canvas.height - 30;
 }
 resizeCanvas();
