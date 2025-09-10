@@ -198,12 +198,12 @@ function update() {
     showFloatingText("PERFECT!", "white");
     triggerExplosion(ball.x, ball.y);
 
-    if (score % 50 === 0) {
-      level++;
-      ball.dx *= speedIncrease;
-      ball.dy *= speedIncrease;
-      showFloatingText("LEVEL UP!", "yellow");
-      levelUpSound.currentTime = 0; levelUpSound.play();
+    // Setiap 50 skor, naik level
+if (score % 50 === 0) {
+  level++;
+  ball.dx *= speedIncrease; // percepat X
+  ball.dy *= speedIncrease; // percepat Y
+
     }
   }
 
