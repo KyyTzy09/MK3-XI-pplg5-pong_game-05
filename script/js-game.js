@@ -23,15 +23,17 @@ const ball = {
   x: 0,
   y: 0,
   radius: 8,
-  dx: 3,
-  dy: -3,
+  dx: 4,
+  dy: -4,
 };
 
 let score = 0;
+let level = 1;
 let lives = 3;
 let isGameRunning = false;
-let level = 1;
-let startTime; // Variabel untuk mencatat waktu mulai permainan
+let isGameOver = false;
+let speedIncrease = 1.2;
+let startTime;
 
 // === SOUND EFFECT ===
 const bounceSound = new Audio("https://freesound.org/data/previews/82/82364_1022651-lq.mp3");
@@ -44,8 +46,6 @@ const levelUpSound = new Audio("https://freesound.org/data/previews/331/331912_3
 const bgMusic = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
 bgMusic.loop = true;
 bgMusic.volume = 0.5;
-
-// Start musik saat klik pertama (autoplay fix)
 document.addEventListener("click", () => {
   if (bgMusic.paused) bgMusic.play();
 });
@@ -53,15 +53,10 @@ document.addEventListener("click", () => {
 // === TEXT EFFECT ===
 let floatingText = null;
 function showFloatingText(message, color = "white") {
-  floatingText = {
-    text: message,
-    color: color,
-    opacity: 1,
-    y: canvas.height / 2,
-  };
+  floatingText = { text: message, color, opacity: 1, y: canvas.height / 2 };
 }
 
-// === TRAIL DAN LEDAKAN ===
+// === TRAIL & LEDAKAN ===
 let ballTrail = [];
 let explosions = [];
 
@@ -69,139 +64,97 @@ function updateTrail() {
   ballTrail.unshift({ x: ball.x, y: ball.y });
   if (ballTrail.length > 10) ballTrail.pop();
 }
-
 function drawTrail() {
-  ballTrail.forEach((pos, index) => {
+  ballTrail.forEach((pos, i) => {
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, ball.radius - index * 0.5, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,204,0,${1 - index * 0.1})`;
+    ctx.arc(pos.x, pos.y, ball.radius - i * 0.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,204,0,${1 - i * 0.1})`;
     ctx.fill();
-    ctx.closePath();
   });
 }
-
 function triggerExplosion(x, y) {
   explosions.push({ x, y, radius: 5, alpha: 1 });
 }
-
 function drawExplosions() {
-  explosions.forEach((explosion, i) => {
+  explosions.forEach((ex, i) => {
     ctx.beginPath();
-    ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,255,255,${explosion.alpha})`;
+    ctx.arc(ex.x, ex.y, ex.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${ex.alpha})`;
     ctx.fill();
-    ctx.closePath();
-
-    explosion.radius += 2;
-    explosion.alpha -= 0.05;
-    if (explosion.alpha <= 0) explosions.splice(i, 1);
+    ex.radius += 2;
+    ex.alpha -= 0.05;
+    if (ex.alpha <= 0) explosions.splice(i, 1);
   });
 }
 
-// DOM Elements
-const backBtn = document.getElementById("back-btn");
-const gameOverScreen = document.getElementById("game-over");
-const finalScore = document.getElementById("final-score");
-const restartBtn = document.getElementById("restart-btn");
+// DOM
 const scoreDisplay = document.getElementById("score");
+const finalScore = document.getElementById("final-score");
+const gameOverScreen = document.getElementById("game-over");
+const restartBtn = document.getElementById("restart-btn");
+const backBtn = document.getElementById("back-btn");
 
-// Event Listeners
+// Event Listener
 document.addEventListener("mousemove", movePaddleMouse);
 document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
-
 restartBtn.addEventListener("click", restartGame);
-backBtn.addEventListener("click", backGame);
+backBtn.addEventListener("click", () => location.reload());
 window.addEventListener("resize", resizeCanvas);
 
-// Mouse control
 function movePaddleMouse(e) {
   const rect = canvas.getBoundingClientRect();
   paddle.x = (e.clientX - rect.left) / scaleX - paddle.width / 2;
   if (paddle.x < 0) paddle.x = 0;
-  if (paddle.x + paddle.width > canvas.width)
-    paddle.x = canvas.width - paddle.width;
+  if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
 }
-
-// Keyboard control
 function keyDownHandler(e) {
   if (e.key === "ArrowLeft") paddle.movingLeft = true;
   if (e.key === "ArrowRight") paddle.movingRight = true;
 }
-
 function keyUpHandler(e) {
   if (e.key === "ArrowLeft") paddle.movingLeft = false;
   if (e.key === "ArrowRight") paddle.movingRight = false;
 }
 
-window.addEventListener("load", () => {
-  resetGame();
-  isGameRunning = true;
-  startTime = Date.now();
-  requestAnimationFrame(update);
-});
-
-// Fungsi restartGame() yang sudah diperbaiki
-function restartGame() {
-  gameOverScreen.classList.remove("active");
-  resetGame();
-  isGameRunning = true;
-  bgMusic.currentTime = 0;
-  bgMusic.play();
-  startTime = Date.now();
-  requestAnimationFrame(update);
-}
-
-// Fungsi backGame() yang sudah diperbaiki
-function backGame() {
-  resetGame();
-  window.location.href = "index.html";
-}
-
-function updateHUD() {
-  scoreDisplay.textContent = `Score⭐: ${score} | Lives ❤: ${lives} | Level: ${level}`;
-}
-
 function resetGame() {
   ball.x = canvas.width / 2;
   ball.y = canvas.height / 2;
-  ball.dx = 3 * (Math.random() > 0.5 ? 1 : -1);
-  ball.dy = -3;
+  ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
+  ball.dy = -4;
   paddle.x = canvas.width / 2 - paddle.width / 2;
   paddle.y = canvas.height - 30;
   score = 0;
   level = 1;
   lives = 3;
-  paddle.width = 140;
+  isGameOver = false;
   ballTrail = [];
   explosions = [];
   updateHUD();
+}
+function updateHUD() {
+  scoreDisplay.textContent = `Skor⭐: ${score} | Level: ${level} | Lives ❤: ${lives}`;
 }
 
 function drawPaddle() {
   ctx.fillStyle = "#1e90ff";
   ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
 }
-
 function drawBall() {
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
   ctx.fillStyle = "#ffcc00";
   ctx.fill();
-  ctx.closePath();
 }
-
 function drawFloatingText() {
   if (floatingText) {
     ctx.font = "bold 40px Arial";
-    ctx.fillStyle = `rgba(${floatingText.color === "white" ? "255,255,255" : "255,50,50"},${floatingText.opacity})`;
+    ctx.fillStyle = `rgba(${floatingText.color === "yellow" ? "255,255,0" : "255,255,255"},${floatingText.opacity})`;
     ctx.textAlign = "center";
     ctx.fillText(floatingText.text, canvas.width / 2, floatingText.y);
     floatingText.y -= 1;
     floatingText.opacity -= 0.02;
-    if (floatingText.opacity <= 0) {
-      floatingText = null;
-    }
+    if (floatingText.opacity <= 0) floatingText = null;
   }
 }
 
@@ -217,119 +170,62 @@ function draw() {
 function update() {
   if (!isGameRunning) return;
 
-  // Gerakan paddle
-  if (paddle.movingLeft) {
-    paddle.x -= paddle.speed;
-    if (paddle.x < 0) paddle.x = 0;
-  }
-  if (paddle.movingRight) {
-    paddle.x += paddle.speed;
-    if (paddle.x + paddle.width > canvas.width)
-      paddle.x = canvas.width - paddle.width;
-  }
+  // Paddle movement
+  if (paddle.movingLeft) paddle.x = Math.max(0, paddle.x - paddle.speed);
+  if (paddle.movingRight) paddle.x = Math.min(canvas.width - paddle.width, paddle.x + paddle.speed);
 
-  // Update posisi bola
+  // Ball movement
   ball.x += ball.dx;
   ball.y += ball.dy;
 
-  // Pantulan kiri/kanan
+  // Wall bounce
   if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
     ball.dx *= -1;
-    bounceSound.currentTime = 0;
-    bounceSound.play();
+    bounceSound.currentTime = 0; bounceSound.play();
   }
-
-  // Pantulan atas
   if (ball.y - ball.radius < 0) {
     ball.dy *= -1;
-    bounceSound.currentTime = 0;
-    bounceSound.play();
+    bounceSound.currentTime = 0; bounceSound.play();
   }
 
-  // Pantulan paddle
-  if (
-    ball.y + ball.radius >= paddle.y &&
-    ball.y + ball.radius <= paddle.y + paddle.height &&
-    ball.x >= paddle.x &&
-    ball.x <= paddle.x + paddle.width &&
-    ball.dy > 0
-  ) {
+  // Paddle collision
+  if (ball.y + ball.radius >= paddle.y && ball.x >= paddle.x && ball.x <= paddle.x + paddle.width && ball.dy > 0) {
     ball.dy *= -1;
-    score++;
+    score += 10;
     updateHUD();
-
-    bounceSound.currentTime = 0;
-    bounceSound.play();
-    perfectSound.currentTime = 0;
-    perfectSound.play();
+    bounceSound.currentTime = 0; bounceSound.play();
+    perfectSound.currentTime = 0; perfectSound.play();
     showFloatingText("PERFECT!", "white");
     triggerExplosion(ball.x, ball.y);
 
-    // LEVEL UP setiap 5 poin
-    if (score % 5 === 0) {
+    if (score % 50 === 0) {
       level++;
-      ball.dx *= 1.1;
-      ball.dy *= 1.1;
-      if (paddle.width > 60) {
-        paddle.width -= 10;
-      }
-      showFloatingText(`LEVEL UP!`, "yellow");
-      levelUpSound.currentTime = 0;
-      levelUpSound.play();
+      ball.dx *= speedIncrease;
+      ball.dy *= speedIncrease;
+      showFloatingText("LEVEL UP!", "yellow");
+      levelUpSound.currentTime = 0; levelUpSound.play();
     }
   }
 
-  // Bola jatuh
+  // Ball falls
   if (ball.y - ball.radius > canvas.height) {
     lives--;
     updateHUD();
-    loseSound.currentTime = 0;
-    loseSound.play();
+    loseSound.currentTime = 0; loseSound.play();
     showFloatingText("OH NO!", "red");
 
     if (lives > 0) {
       ball.x = canvas.width / 2;
       ball.y = canvas.height / 2;
-      ball.dx = 3 * (Math.random() > 0.5 ? 1 : -1);
-      ball.dy = -3;
+      ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
+      ball.dy = -4;
     } else {
       isGameRunning = false;
-      finalScore.textContent = `Your Score⭐: ${score}`;
+      isGameOver = true;
+      finalScore.textContent = `Skor Kamu: ${score}`;
       gameOverScreen.classList.add("active");
-
-      bgMusic.pause();
-      bgMusic.currentTime = 0;
-
-      gameOverSound.currentTime = 0;
+      bgMusic.pause(); bgMusic.currentTime = 0;
       gameOverSound.play();
-      
-      const endTime = Date.now();
-      const gameDuration = Math.round((endTime - startTime) / 1000);
-
-      const playerName = localStorage.getItem("currentPlayer") || "Anonim";
-      let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
-      const existingPlayer = leaderboard.find((p) => p.name === playerName);
-
-      if (existingPlayer) {
-        if (score > existingPlayer.score) {
-          existingPlayer.score = score;
-          existingPlayer.time = gameDuration;
-          existingPlayer.date = new Date().toLocaleDateString();
-        }
-        existingPlayer.totalPlays = (existingPlayer.totalPlays || 0) + 1;
-      } else {
-        leaderboard.push({ 
-          name: playerName, 
-          score: score,
-          time: gameDuration,
-          date: new Date().toLocaleDateString(),
-          totalPlays: 1,
-        });
-      }
-
-      leaderboard.sort((a, b) => b.score - a.score);
-      leaderboard = leaderboard.slice(0, 10);
-      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
     }
   }
 
@@ -338,7 +234,15 @@ function update() {
   requestAnimationFrame(update);
 }
 
-// Responsive canvas
+function restartGame() {
+  gameOverScreen.classList.remove("active");
+  resetGame();
+  isGameRunning = true;
+  bgMusic.currentTime = 0; bgMusic.play();
+  startTime = Date.now();
+  requestAnimationFrame(update);
+}
+
 function resizeCanvas() {
   canvas.width = window.innerWidth * 0.9;
   canvas.height = window.innerHeight * 0.8;
@@ -348,3 +252,13 @@ function resizeCanvas() {
 }
 resizeCanvas();
 
+// Start game
+document.getElementById("start-btn").addEventListener("click", () => {
+  document.getElementById("start-screen").classList.remove("active");
+  document.getElementById("game-container").style.display = "block";
+  resetGame();
+  isGameRunning = true;
+  startTime = Date.now();
+  bgMusic.play();
+  update();
+});
