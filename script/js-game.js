@@ -347,3 +347,4 @@ function resizeCanvas() {
   paddle.y = canvas.height - 30;
 }
 resizeCanvas();
+
