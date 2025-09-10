@@ -152,3 +152,71 @@ button:hover {
   padding: 5px 10px;
   border-radius: 5px;
 }
+
+/* Atur container utama (screen) agar elemennya berada di tengah dan berjarak rapi */
+.screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Styling untuk judul leaderboard */
+.screen h1 {
+  font-size: 2.5rem;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+  margin-bottom: 20px; /* Beri jarak antara judul dan daftar */
+}
+
+/* Container khusus untuk daftar leaderboard */
+.scrollable-list {
+  max-height: 60vh; /* Tinggi daftar lebih besar */
+  overflow-y: auto;
+  width: 90%; /* Lebar lebih besar */
+  max-width: 500px; /* Batasan lebar maksimal agar tidak terlalu lebar di layar besar */
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(5px);
+  list-style-type: none;
+  text-align: left;
+  color: #e0e0e0;
+}
+
+/* Scrollbar kustom (opsional) */
+.scrollable-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+  background-color: #1e90ff;
+  border-radius: 4px;
+}
+
+/* Styling untuk setiap item daftar (li) */
+.scrollable-list li {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 15px;
+  margin: 12px 0;
+  border-radius: 8px;
+  background: rgba(30, 144, 255, 0.1);
+  border: 1px solid rgba(30, 144, 255, 0.3);
+  transition: transform 0.2s, background 0.2s;
+  display: flex; /* Gunakan flexbox untuk penataan yang lebih rapi */
+  justify-content: space-between; /* Pisahkan nama dan skor */
+  align-items: center;
+}
+
+/* Memberikan efek visual saat item di hover */
+.scrollable-list li:hover {
+  transform: translateX(5px);
+  background: rgba(30, 144, 255, 0.2);
+}

@@ -31,6 +31,7 @@ let score = 0;
 let lives = 3;
 let isGameRunning = false;
 let level = 1;
+let startTime; // Variabel untuk mencatat waktu mulai permainan
 
 // === SOUND EFFECT ===
 const bounceSound = new Audio("https://freesound.org/data/previews/82/82364_1022651-lq.mp3");
@@ -127,6 +128,7 @@ function keyDownHandler(e) {
   if (e.key === "ArrowLeft") paddle.movingLeft = true;
   if (e.key === "ArrowRight") paddle.movingRight = true;
 }
+
 function keyUpHandler(e) {
   if (e.key === "ArrowLeft") paddle.movingLeft = false;
   if (e.key === "ArrowRight") paddle.movingRight = false;
@@ -135,22 +137,25 @@ function keyUpHandler(e) {
 window.addEventListener("load", () => {
   resetGame();
   isGameRunning = true;
+  startTime = Date.now();
   requestAnimationFrame(update);
 });
 
+// Fungsi restartGame() yang sudah diperbaiki
 function restartGame() {
   gameOverScreen.classList.remove("active");
   resetGame();
   isGameRunning = true;
   bgMusic.currentTime = 0;
   bgMusic.play();
+  startTime = Date.now();
   requestAnimationFrame(update);
 }
 
+// Fungsi backGame() yang sudah diperbaiki
 function backGame() {
   resetGame();
   window.location.href = "index.html";
-  requestAnimationFrame(true);
 }
 
 function updateHUD() {
@@ -297,6 +302,9 @@ function update() {
 
       gameOverSound.currentTime = 0;
       gameOverSound.play();
+      
+      const endTime = Date.now();
+      const gameDuration = Math.round((endTime - startTime) / 1000);
 
       const playerName = localStorage.getItem("currentPlayer") || "Anonim";
       let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
@@ -305,9 +313,18 @@ function update() {
       if (existingPlayer) {
         if (score > existingPlayer.score) {
           existingPlayer.score = score;
+          existingPlayer.time = gameDuration;
+          existingPlayer.date = new Date().toLocaleDateString();
         }
+        existingPlayer.totalPlays = (existingPlayer.totalPlays || 0) + 1;
       } else {
-        leaderboard.push({ name: playerName, score: score });
+        leaderboard.push({ 
+          name: playerName, 
+          score: score,
+          time: gameDuration,
+          date: new Date().toLocaleDateString(),
+          totalPlays: 1,
+        });
       }
 
       leaderboard.sort((a, b) => b.score - a.score);
