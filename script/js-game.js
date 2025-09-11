@@ -36,14 +36,26 @@ let speedIncrease = 1.2;
 let startTime;
 
 // === SOUND EFFECT ===
-const bounceSound = new Audio("https://freesound.org/data/previews/82/82364_1022651-lq.mp3");
-const loseSound = new Audio("https://freesound.org/data/previews/331/331912_3248244-lq.mp3");
-const gameOverSound = new Audio("https://freesound.org/data/previews/398/398867_5121236-lq.mp3");
-const perfectSound = new Audio("https://freesound.org/data/previews/341/341695_5121236-lq.mp3");
-const levelUpSound = new Audio("https://freesound.org/data/previews/331/331912_3248244-lq.mp3");
+const bounceSound = new Audio(
+  "https://freesound.org/data/previews/82/82364_1022651-lq.mp3"
+);
+const loseSound = new Audio(
+  "https://freesound.org/data/previews/331/331912_3248244-lq.mp3"
+);
+const gameOverSound = new Audio(
+  "https://freesound.org/data/previews/398/398867_5121236-lq.mp3"
+);
+const perfectSound = new Audio(
+  "https://freesound.org/data/previews/341/341695_5121236-lq.mp3"
+);
+const levelUpSound = new Audio(
+  "https://freesound.org/data/previews/331/331912_3248244-lq.mp3"
+);
 
 // === BACKGROUND MUSIC ===
-const bgMusic = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+const bgMusic = new Audio(
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+);
 bgMusic.loop = true;
 bgMusic.volume = 0.5;
 document.addEventListener("click", () => {
@@ -99,14 +111,15 @@ document.addEventListener("mousemove", movePaddleMouse);
 document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 restartBtn.addEventListener("click", restartGame);
-backBtn.addEventListener("click", () => location.reload());
+backBtn.addEventListener("click", () => (window.location.href = "index.html"));
 window.addEventListener("resize", resizeCanvas);
 
 function movePaddleMouse(e) {
   const rect = canvas.getBoundingClientRect();
   paddle.x = (e.clientX - rect.left) / scaleX - paddle.width / 2;
   if (paddle.x < 0) paddle.x = 0;
-  if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+  if (paddle.x + paddle.width > canvas.width)
+    paddle.x = canvas.width - paddle.width;
 }
 function keyDownHandler(e) {
   if (e.key === "ArrowLeft") paddle.movingLeft = true;
@@ -149,7 +162,9 @@ function drawBall() {
 function drawFloatingText() {
   if (floatingText) {
     ctx.font = "bold 40px Arial";
-    ctx.fillStyle = `rgba(${floatingText.color === "yellow" ? "255,255,0" : "255,255,255"},${floatingText.opacity})`;
+    ctx.fillStyle = `rgba(${
+      floatingText.color === "yellow" ? "255,255,0" : "255,255,255"
+    },${floatingText.opacity})`;
     ctx.textAlign = "center";
     ctx.fillText(floatingText.text, canvas.width / 2, floatingText.y);
     floatingText.y -= 1;
@@ -172,7 +187,8 @@ function update() {
 
   // Paddle movement
   if (paddle.movingLeft) paddle.x = Math.max(0, paddle.x - paddle.speed);
-  if (paddle.movingRight) paddle.x = Math.min(canvas.width - paddle.width, paddle.x + paddle.speed);
+  if (paddle.movingRight)
+    paddle.x = Math.min(canvas.width - paddle.width, paddle.x + paddle.speed);
 
   // Ball movement
   ball.x += ball.dx;
@@ -181,29 +197,52 @@ function update() {
   // Wall bounce
   if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
     ball.dx *= -1;
-    bounceSound.currentTime = 0; bounceSound.play();
+    bounceSound.currentTime = 0;
+    bounceSound.play();
   }
   if (ball.y - ball.radius < 0) {
     ball.dy *= -1;
-    bounceSound.currentTime = 0; bounceSound.play();
+    bounceSound.currentTime = 0;
+    bounceSound.play();
   }
 
   // Paddle collision
-  if (ball.y + ball.radius >= paddle.y && ball.x >= paddle.x && ball.x <= paddle.x + paddle.width && ball.dy > 0) {
+  if (
+    ball.y + ball.radius >= paddle.y &&
+    ball.x >= paddle.x &&
+    ball.x <= paddle.x + paddle.width &&
+    ball.dy > 0
+  ) {
     ball.dy *= -1;
-    score += 10;
+
+    // Hitung skor sesuai level
+    let pointPerHit = 1 + Math.floor((level - 1) / 2) * 2;
+    // Level 1-2 = 5, Level 3-4 = 7, Level 5-6 = 9, dst
+    score += pointPerHit;
+
     updateHUD();
-    bounceSound.currentTime = 0; bounceSound.play();
-    perfectSound.currentTime = 0; perfectSound.play();
-    showFloatingText("PERFECT!", "white");
+    bounceSound.currentTime = 0;
+    bounceSound.play();
+    perfectSound.currentTime = 0;
+    perfectSound.play();
+    showFloatingText(`+${pointPerHit} point!`, "yellow");
     triggerExplosion(ball.x, ball.y);
 
-    // Setiap 50 skor, naik level
-if (score % 50 === 0) {
-  level++;
-  ball.dx *= speedIncrease; // percepat X
-  ball.dy *= speedIncrease; // percepat Y
+    // Naik level tiap 5 skor
+    if (score % 5 === 0 && level < 10) {
+      level++;
 
+      // Tambah kecepatan bola (tapi jgn kepelanet)
+      ball.dx *= 1.15;
+      ball.dy *= 1.15;
+
+      // Paddle makin kecil
+      paddle.width = Math.max(60, paddle.width - 10); // minimal 60px
+
+      // Efek teks "LEVEL UP!"
+      showFloatingText(`LEVEL ${level} UP!`, "white");
+      levelUpSound.currentTime = 0;
+      levelUpSound.play();
     }
   }
 
@@ -211,7 +250,8 @@ if (score % 50 === 0) {
   if (ball.y - ball.radius > canvas.height) {
     lives--;
     updateHUD();
-    loseSound.currentTime = 0; loseSound.play();
+    loseSound.currentTime = 0;
+    loseSound.play();
     showFloatingText("OH NO!", "red");
 
     if (lives > 0) {
@@ -224,7 +264,8 @@ if (score % 50 === 0) {
       isGameOver = true;
       finalScore.textContent = `Skor Kamu: ${score}`;
       gameOverScreen.classList.add("active");
-      bgMusic.pause(); bgMusic.currentTime = 0;
+      bgMusic.pause();
+      bgMusic.currentTime = 0;
       gameOverSound.play();
     }
   }
@@ -238,7 +279,8 @@ function restartGame() {
   gameOverScreen.classList.remove("active");
   resetGame();
   isGameRunning = true;
-  bgMusic.currentTime = 0; bgMusic.play();
+  bgMusic.currentTime = 0;
+  bgMusic.play();
   startTime = Date.now();
   requestAnimationFrame(update);
 }
@@ -252,13 +294,12 @@ function resizeCanvas() {
 }
 resizeCanvas();
 
-// Start game
-document.getElementById("start-btn").addEventListener("click", () => {
-  document.getElementById("start-screen").classList.remove("active");
+// === AUTO START GAME ===
+window.addEventListener("load", () => {
   document.getElementById("game-container").style.display = "block";
   resetGame();
   isGameRunning = true;
   startTime = Date.now();
-  bgMusic.play();
+  bgMusic.play(); // langsung main musik
   update();
 });

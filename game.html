@@ -1,27 +1,26 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Starry Night Pong Game✨</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <!-- Canvas Game -->
-  <div id="game-container">
-    <canvas id="gameCanvas"></canvas>
-    <div id="score"> Score⭐: 0 </div>
-  </div>
-  <!-- Tampilan Game Over -->
-  <div id="game-over" class="screen">
-    <h2>Game Over ‼ </h2>
-    <p id="final-score"> Your Score⭐ : 0</p>
-    <div class="btn-container">
-      <button class="btn-menu" id="back-btn"> Back ◀</button>
-      <button class="btn-menu" id="restart-btn"> Try Again 🔁</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Starry Night Pong Game✨</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Canvas Game -->
+    <div id="game-container">
+      <canvas id="gameCanvas"></canvas>
+      <div id="score">Score⭐: 0</div>
     </div>
-  </div>
-
-  <script src="./script/js-game.js"></script>
-</body>
+    <!-- Tampilan Game Over -->
+    <div id="game-over" class="screen">
+      <h2>Game Over ‼</h2>
+      <p id="final-score">Your Score⭐ : 0</p>
+      <div class="btn-container">
+        <button class="btn-menu" id="back-btn">Back ◀</button>
+        <button class="btn-menu" id="restart-btn">Try Again 🔁</button>
+      </div>
+    </div>
+    <script src="./script/js-game.js"></script>
+  </body>
 </html>
