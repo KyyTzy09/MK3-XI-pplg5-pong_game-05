@@ -23,8 +23,8 @@ const ball = {
   x: 0,
   y: 0,
   radius: 8,
-  dx: 4,
-  dy: -4,
+  dx: 3, // awal lebih pelan
+  dy: -3,
 };
 
 let score = 0;
@@ -34,6 +34,22 @@ let isGameRunning = false;
 let isGameOver = false;
 let speedIncrease = 1.2;
 let startTime;
+let lastLevelUpScore = 0; // kontrol supaya level tidak dobel
+
+// === LEVEL THRESHOLDS (kumulatif) ===
+const levelThresholds = [
+  0, // dummy
+  5,
+  13,
+  23,
+  36,
+  52,
+  70,
+  90,
+  112,
+  136,
+];
+const MAX_LEVEL = 10;
 
 // === SOUND EFFECT ===
 const bounceSound = new Audio(
@@ -133,20 +149,23 @@ function keyUpHandler(e) {
 function resetGame() {
   ball.x = canvas.width / 2;
   ball.y = canvas.height / 2;
-  ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
-  ball.dy = -4;
+  // awal lebih pelan
+  ball.dx = 3 * (Math.random() > 0.5 ? 1 : -1);
+  ball.dy = -3;
   paddle.x = canvas.width / 2 - paddle.width / 2;
   paddle.y = canvas.height - 30;
   score = 0;
   level = 1;
   lives = 3;
+  lastLevelUpScore = 0; // reset kontrol level up
   isGameOver = false;
   ballTrail = [];
   explosions = [];
+  paddle.width = 140;
   updateHUD();
 }
 function updateHUD() {
-  scoreDisplay.textContent = `Skor⭐: ${score} | Level: ${level} | Lives ❤: ${lives}`;
+  scoreDisplay.textContent = `Skor⭐: ${score} | Level: ${level}/10 | Lives ❤: ${lives}`;
 }
 
 function drawPaddle() {
@@ -216,8 +235,7 @@ function update() {
     ball.dy *= -1;
 
     // Hitung skor sesuai level
-    let pointPerHit = 1 + Math.floor((level - 1) / 2) * 2;
-    // Level 1-2 = 5, Level 3-4 = 7, Level 5-6 = 9, dst
+    let pointPerHit = 1
     score += pointPerHit;
 
     updateHUD();
@@ -228,21 +246,24 @@ function update() {
     showFloatingText(`+${pointPerHit} point!`, "yellow");
     triggerExplosion(ball.x, ball.y);
 
-    // Naik level tiap 5 skor
-    if (score % 5 === 0 && level < 10) {
+    // === LEVEL UP CHECK ===
+    if (
+      level < MAX_LEVEL &&
+      score >= levelThresholds[level] &&
+      lastLevelUpScore < levelThresholds[level]
+    ) {
       level++;
+      lastLevelUpScore = score;
 
-      // Tambah kecepatan bola (tapi jgn kepelanet)
-      ball.dx *= 1.15;
-      ball.dy *= 1.15;
+      ball.dx *= 1.2;
+      ball.dy *= 1.2;
 
-      // Paddle makin kecil
-      paddle.width = Math.max(60, paddle.width - 10); // minimal 60px
+      paddle.width = Math.max(60, paddle.width - 10);
 
-      // Efek teks "LEVEL UP!"
       showFloatingText(`LEVEL ${level} UP!`, "white");
       levelUpSound.currentTime = 0;
       levelUpSound.play();
+      updateHUD();
     }
   }
 
@@ -257,8 +278,8 @@ function update() {
     if (lives > 0) {
       ball.x = canvas.width / 2;
       ball.y = canvas.height / 2;
-      ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
-      ball.dy = -4;
+      ball.dx = 3 * (Math.random() > 0.5 ? 1 : -1);
+      ball.dy = -3;
     } else {
       isGameRunning = false;
       isGameOver = true;
@@ -267,6 +288,9 @@ function update() {
       bgMusic.pause();
       bgMusic.currentTime = 0;
       gameOverSound.play();
+
+      saveToLeaderboard(score, level);
+      renderLeaderboardIntoGameOver();
     }
   }
 
@@ -275,6 +299,41 @@ function update() {
   requestAnimationFrame(update);
 }
 
+// === LEADERBOARD ===
+function saveToLeaderboard(scoreValue, reachedLevel) {
+  try {
+    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+    const currentPlayer = localStorage.getItem("currentPlayer") || "Player";
+
+    const existingIndex = leaderboard.findIndex(
+      (entry) => entry.name === currentPlayer
+    );
+
+    if (existingIndex >= 0) {
+      if (scoreValue > leaderboard[existingIndex].score) {
+        leaderboard[existingIndex].score = scoreValue;
+        leaderboard[existingIndex].level = reachedLevel;
+        leaderboard[existingIndex].date = new Date().toLocaleString();
+      }
+    } else {
+      leaderboard.push({
+        name: currentPlayer,
+        score: scoreValue,
+        level: reachedLevel,
+        date: new Date().toLocaleString(),
+      });
+    }
+
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard = leaderboard.slice(0, 10);
+
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+  } catch (e) {
+    console.error("Gagal menyimpan leaderboard:", e);
+  }
+}
+
+// Restart game
 function restartGame() {
   gameOverScreen.classList.remove("active");
   resetGame();
@@ -300,6 +359,6 @@ window.addEventListener("load", () => {
   resetGame();
   isGameRunning = true;
   startTime = Date.now();
-  bgMusic.play(); // langsung main musik
-  update();
+  bgMusic.play().catch(() => {});
+  requestAnimationFrame(update);
 });
